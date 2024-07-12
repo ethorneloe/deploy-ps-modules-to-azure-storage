@@ -94,7 +94,8 @@ runs:
                   $moduleName = $psd1File.BaseName
                   $uploadFileName = "$moduleName-v$moduleVersion.zip"
                   $uploadPath = "$moduleName/$uploadFileName"
-                  $zipFilePath = "$env:TEMP/$uploadFileName"
+                  $temp = [System.IO.Path]::GetTempPath()
+                  $zipFilePath = "$temp/$uploadFileName"
 
                   # Create zip archive and upload to Azure storage
                   Compress-Archive -Path "$moduleFolder/*" -DestinationPath $zipFilePath -Force
