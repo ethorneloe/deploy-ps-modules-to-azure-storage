@@ -35,7 +35,7 @@ runs:
       run: |
 
         # It is assumed that all module folders exist under the base module path provided.
-        $sourcePath = ${{ inputs.repo-powershell-module-path }}
+        $sourcePath = '${{ inputs.repo-powershell-module-path }}'
 
         # Initialize an ArrayList to store module folders
         $moduleFolders = [System.Collections.ArrayList]@()
@@ -54,31 +54,28 @@ runs:
             }
         }
 
-        if ($moduleFolders.count -eq 0)
-        {
+        if ($moduleFolders.count -eq 0) {
             Write-Warning "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
             return
         }
 
         # Check each module folder for a .psd1 file and a version number contained within.
         foreach ($module in $moduleFolders) {
-            try {
-                # Find the .psd1 file in the module directory.
-                $psd1File = Get-ChildItem -Path $module.FullName | Where-Object { $_.extension -eq '.psd1' }
-                if ($null -eq $psd1File) {
-                    throw "No .psd1 file found in $module directory '$(module.FullName)'."
-                }
+            # Find the .psd1 file in the module directory.
+            $psd1File = Get-ChildItem -Path $module.FullName | Where-Object { $_.extension -eq '.psd1' }
+            if ($null -eq $psd1File) {
+                throw "No .psd1 file found in $module directory '$(module.FullName)'."
+            }
 
-                # Read the module version from the .psd1 file
-                $content = Get-Content -Path $psd1File.FullName
-                $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
-                if ($null -eq $versionLine) {
-                    throw "ModuleVersion is not present or not set correctly in $($psd1File.FullName).  Expected format is ModuleVersion = x.y.z"
-                }
+            # Read the module version from the .psd1 file
+            $content = Get-Content -Path $psd1File.FullName
+            $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
+            if ($null -eq $versionLine) {
+                throw "ModuleVersion is not present or not set correctly in $($psd1File.FullName).  Expected format is ModuleVersion = x.y.z"
             }
         }
 
-        echo moduleFolders=$moduleFolders >> $GITHUB_OUTPUT
+        Write-Output "moduleFolders=$moduleFolders" >> $env:GITHUB_OUTPUT
 
       shell: pwsh
 
@@ -101,7 +98,7 @@ runs:
 
           $containerName = '${{ inputs.storage-account-container-name }}'
           $storageAccountName = '${{ inputs.storage-account-name }}'
-          $moduleFolders = ${{ steps.module-discovery.outputs.moduleFolders }}
+          $moduleFolders = '${{ steps.module-discovery.outputs.moduleFolders }}'
 
           try {
               $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -UseConnectedAccount
