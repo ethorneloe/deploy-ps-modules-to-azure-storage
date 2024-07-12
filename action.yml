@@ -62,9 +62,9 @@ runs:
         # Check each module folder for a .psd1 file and a version number contained within.
         foreach ($module in $moduleFolders) {
             # Find the .psd1 file in the module directory.
-            $psd1File = Get-ChildItem -Path $module.FullName | Where-Object { $_.extension -eq '.psd1' }
+            $psd1File = Get-ChildItem -Path $module | Where-Object { $_.extension -eq '.psd1' }
             if ($null -eq $psd1File) {
-                throw "No .psd1 file found in $module directory '$($module.FullName)'."
+                throw "No .psd1 file found in $module"
             }
 
             # Read the module version from the .psd1 file
