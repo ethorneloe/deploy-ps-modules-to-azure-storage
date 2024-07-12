@@ -3,18 +3,6 @@ name: "deploy-ps-modules-to-azure-storage"
 description: "Deploys versioned zip files of PowerShell script modules within a git repo into Azure storage."
 
 inputs:
-  subscription-id:
-    description: "Azure subscription id"
-    required: true
-  tenant-id:
-    description: "Azure tenant id"
-    required: true
-  client-id:
-    description: "Azure client id or application id"
-    required: true
-  resource-group-name:
-    description: "Azure resource group containing the storage account"
-    required: true
   storage-account-name:
     description: "Azure storage account name"
     required: true
@@ -29,76 +17,53 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # Confirm all the modules have appropriate versioning in .psd1 files
-    - name: Module discovery
-      id: module-discovery
-      run: |
-
-        # It is assumed that all module folders exist under the base module path provided.
-        $sourcePath = '${{ inputs.repo-powershell-module-path }}'
-
-        # Initialize an ArrayList to store module folders
-        $moduleFolders = [System.Collections.ArrayList]@()
-
-        # Get all directories recursively
-        $directories = Get-ChildItem -Path $sourcePath -Directory -Recurse
-
-        foreach ($directory in $directories) {
-            # Check if the directory contains both .psd1 and .psm1 files
-            $psd1File = Get-ChildItem -Path $directory.FullName -Filter *.psd1 -ErrorAction SilentlyContinue
-            $psm1File = Get-ChildItem -Path $directory.FullName -Filter *.psm1 -ErrorAction SilentlyContinue
-
-            if ($psd1File -and $psm1File) {
-                # Add the directory to the ArrayList
-                [void]$moduleFolders.Add($directory.FullName)
-            }
-        }
-
-        if ($moduleFolders.count -eq 0) {
-            Write-Warning "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
-            return
-        }
-
-        # Check each module folder for a .psd1 file and a version number contained within.
-        foreach ($module in $moduleFolders) {
-            # Find the .psd1 file in the module directory.
-            $psd1File = Get-ChildItem -Path $module | Where-Object { $_.extension -eq '.psd1' }
-            if ($null -eq $psd1File) {
-                throw "No .psd1 file found in $module"
-            }
-
-            # Read the module version from the .psd1 file
-            $content = Get-Content -Path $psd1File.FullName
-            $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
-            if ($null -eq $versionLine) {
-                throw "ModuleVersion is not present or not set correctly in $($psd1File.FullName).  Expected format is ModuleVersion = x.y.z"
-            }
-        }
-
-        Write-Output "moduleFolders=$moduleFolders" >> $env:GITHUB_OUTPUT
-
-      shell: pwsh
-
-    # Authenticate to Azure and enable AzPSSession
-    - name: Authenticate to Azure
-      if: steps.module-discovery.outputs.moduleFolders != ''
-      uses: azure/login@v2
-      with:
-        client-id: ${{ inputs.client-id}}
-        tenant-id: ${{ inputs.tenant-id }}
-        subscription-id: ${{ inputs.subscription-id }}
-        enable-AzPSSession: true
-
-    # Zip module folders and upload to Azure Storage
+    # Perform basic checks on module folders and upload to versioned zip files to Azure Storage
     - name: Upload modules to Azure storage
-      if: steps.module-discovery.outputs.moduleFolders != ''
       uses: azure/powershell@v2
       with:
         inlineScript: |
 
+          $sourcePath = '${{ inputs.repo-powershell-module-path }}'
           $containerName = '${{ inputs.storage-account-container-name }}'
           $storageAccountName = '${{ inputs.storage-account-name }}'
-          $moduleFolders = '${{ steps.module-discovery.outputs.moduleFolders }}'
+
+          # Initialize an ArrayList to store module folders
+          $moduleFolders = [System.Collections.ArrayList]@()
+
+          # Get all directories recursively
+          $directories = Get-ChildItem -Path $sourcePath -Directory -Recurse
+
+          foreach ($directory in $directories) {
+              # Check if the directory contains both .psd1 and .psm1 files
+              $psd1File = Get-ChildItem -Path $directory.FullName -Filter *.psd1 -ErrorAction SilentlyContinue
+              $psm1File = Get-ChildItem -Path $directory.FullName -Filter *.psm1 -ErrorAction SilentlyContinue
+
+              if ($psd1File -and $psm1File) {
+                  # Add the directory to the ArrayList
+                  [void]$moduleFolders.Add($directory.FullName)
+              }
+          }
+
+          if ($moduleFolders.count -eq 0) {
+              Write-Warning "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
+              exit(0)
+          }
+
+          # Check each module folder for a .psd1 file and a version number contained within.
+          foreach ($module in $moduleFolders) {
+              # Find the .psd1 file in the module directory.
+              $psd1File = Get-ChildItem -Path $module | Where-Object { $_.extension -eq '.psd1' }
+              if ($null -eq $psd1File) {
+                  throw "No .psd1 file found in $module"
+              }
+
+              # Read the module version from the .psd1 file
+              $content = Get-Content -Path $psd1File.FullName
+              $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
+              if ($null -eq $versionLine) {
+                  throw "ModuleVersion is not present or not set correctly in $($psd1File.FullName).  Expected format is ModuleVersion = x.y.z"
+              }
+          }
 
           try {
               $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -UseConnectedAccount
@@ -111,10 +76,18 @@ runs:
               try {
                   # Find the .psd1 file in the module directory.
                   $psd1File = Get-ChildItem -Path $moduleFolder | Where-Object { $_.extension -eq '.psd1' }
+                  if ($null -eq $psd1File) {
+                      throw "No .psd1 file found in $module"
+                  }
 
                   # Read the module version from the .psd1 file
                   $content = Get-Content -Path $psd1File.FullName
                   $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
+
+                  if ($null -eq $versionLine) {
+                      throw "ModuleVersion is not present or not set correctly in $($psd1File.FullName).  Expected format is ModuleVersion = x.y.z"
+                  }
+
                   $moduleVersion = $versionLine.Matches.Groups[1].Value.Trim()
 
                   # Configure filenames and paths
