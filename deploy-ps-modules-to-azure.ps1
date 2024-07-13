@@ -138,7 +138,7 @@ foreach ($moduleFolder in $moduleFolders) {
 Write-Output "Copying zip acrhives from $uniqueTempPath to Azure storage"
 $Env:AZCOPY_AUTO_LOGIN_TYPE = "AZCLI"
 $Env:AZCOPY_TENANT_ID = $tenantId
-azcopy copy $uniqueTempPath "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=false --recursive=true
+azcopy copy $uniqueTempPath "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite --recursive=true
 
 # Clean up the temp folder
 Write-Output "Deleting $uniqueTempPath"
