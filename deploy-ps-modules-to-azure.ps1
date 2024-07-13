@@ -54,7 +54,7 @@ Write-Output "Using module source path: $sourcePath"
 
 # Check the overwrite param for true/false and set to false if null or empty
 if ([string]::IsNullOrEmpty($overwrite)) { $overwrite = 'false' }
-$overwrite = (('${{ inputs.overwrite }}').toLower()).trim()
+$overwrite = ($overwrite.toLower()).trim()
 if ( ($overwrite -ne 'true') -and ($overwrite -ne 'false') ) {
     throw "The overwrite input when set must be configured as 'true' or 'false' (default is 'false')"
 }
