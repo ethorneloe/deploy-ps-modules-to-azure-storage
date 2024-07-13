@@ -35,7 +35,7 @@ runs:
             tenantId = '${{ inputs.tenant-id }}'
             overwrite = '${{ inputs.overwrite }}'
         }
-        deploy-ps-modules-to-azure.ps1 @params
+        ${{ github.action_path }}/deploy-ps-modules-to-azure.ps1 @params
 
       shell: pwsh
 
