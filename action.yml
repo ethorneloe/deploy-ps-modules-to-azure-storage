@@ -69,11 +69,13 @@ runs:
         # Configure a unique temp directory for holding zip files
         $now = Get-Date
         $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-        $tempFolderName = "$actionName_$dateTimeString"
+        $tempFolderName = $($actionName)_$($dateTimeString)
         $tempBasePath = [System.IO.Path]::GetTempPath()
         $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
 
         Write-Output "Using temp path: $uniqueTempPath"
+
+        New-Item -Path $uniqueTempPath -type Directory | Out-Null
 
         # Check each module for a .psd1 file that contains a version number and if so versioned zip to temp path
         foreach ($moduleFolder in $moduleFolders) {
