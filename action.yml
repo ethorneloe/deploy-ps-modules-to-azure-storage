@@ -69,7 +69,7 @@ runs:
         # Configure a unique temp directory for holding zip files
         $now = Get-Date
         $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-        $tempFolderName = $($actionName)_$($dateTimeString)
+        $tempFolderName = "$($actionName)_$($dateTimeString)"
         $tempBasePath = [System.IO.Path]::GetTempPath()
         $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
 
