@@ -149,9 +149,8 @@ $Env:AZCOPY_JOB_PLAN_LOCATION = "$uniqueTempPath/plan"
 
 # Copy the versioned zip files to Azure
 if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
-    Write-Host "Copying zip archives from $uniqueTempPath to Azure storage"
-    $commandOutput = azcopy copy "$uniqueTempPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite 2>&1
-    write-host $commandOutput
+    Write-Host "Copying zip archives from "$uniqueTempPath/modules" to Azure storage"
+    azcopy copy "$uniqueTempPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite 2>&1 | ForEach-Object { Write-Host $_ }
 }
 
 # Return the temp path for other steps in action.yml to consume.  Clean up is done after the azcopy log has been uploaded as an artifact.
