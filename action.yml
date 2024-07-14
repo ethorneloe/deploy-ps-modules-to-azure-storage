@@ -31,7 +31,7 @@ runs:
     - name: Create temp directory for script output
       id: create-temp-output-path
       run: |
-        # Configure a unique temp directory for holding zip files
+        # Configure temp output path for zip files and logs
         $now = Get-Date
         $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
         $scriptPath = $MyInvocation.MyCommand.Path
@@ -44,7 +44,6 @@ runs:
 
       shell: pwsh
 
-    # Perform basic checks on module folders and upload to versioned zip files to Azure Storage
     - name: Upload modules to Azure storage
       run: |
         # Execute deploy-ps-modules-to-azure.ps1
@@ -60,8 +59,15 @@ runs:
 
       shell: pwsh
 
+    - uses: actions/upload-artifact@v4
+      with:
+        name: "azcopylog.zip"
+        path: ${{ steps.create-temp-output-path.outputs.outputPath }}/logs/*.zip
+        retention-days: 14
+
     - name: Clean up temp folder
       run: |
+        # Clean up temp output path
         $outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
         Write-Output "Deleting $outputPath"
         try {

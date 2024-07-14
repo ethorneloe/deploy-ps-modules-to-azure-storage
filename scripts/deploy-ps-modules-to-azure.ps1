@@ -140,8 +140,13 @@ $Env:AZCOPY_TENANT_ID = $tenantId
 $Env:AZCOPY_LOG_LOCATION = "$outputPath/logs"
 $Env:AZCOPY_JOB_PLAN_LOCATION = "$outputPath/plan"
 
-# Copy the versioned zip files to Azure
+# Copy the versioned zip files to Azure and compress log file for artifact upload later on.
+# Files are cleaned up in another step in action.yml once artifact upload is complete.
 if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
     Write-Host "Copying zip archives from "$outputPath/modules" to Azure storage"
     azcopy copy "$outputPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
+
+    $zipFileName = "azcopylog.zip"
+    $zipFilePath = "$outputPath/logs/$zipFileName"
+    Compress-Archive -Path "$outputPath/logs*" -DestinationPath $zipFilePath -Force
 }
