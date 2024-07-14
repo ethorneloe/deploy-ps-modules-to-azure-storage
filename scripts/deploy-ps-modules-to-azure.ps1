@@ -53,7 +53,7 @@ param (
     [string]$overwrite = 'false'
 )
 
-Write-Output "Using module source path: $sourcePath"
+Write-Host "Using module source path: $sourcePath"
 
 # Check the overwrite param for true/false and set to false if null or empty
 if ([string]::IsNullOrEmpty($overwrite)) { $overwrite = 'false' }
@@ -84,8 +84,8 @@ if ($moduleFolders.count -eq 0) {
     throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
 }
 
-Write-Output "Found module folders:"
-Write-Output $moduleFolders
+Write-Host "Found module folders:"
+Write-Host $moduleFolders
 
 # Configure a unique temp directory for holding zip files
 $now = Get-Date
@@ -96,7 +96,7 @@ $tempFolderName = "$($scriptNameWithoutExtension)_$($dateTimeString)"
 $tempBasePath = [System.IO.Path]::GetTempPath()
 $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
 
-Write-Output "Using temp path: $uniqueTempPath"
+Write-Host "Using temp path: $uniqueTempPath"
 
 # Create required directories
 New-Item -Path $uniqueTempPath -type Directory | Out-Null
@@ -129,9 +129,9 @@ foreach ($moduleFolder in $moduleFolders) {
         $zipFileName = "$moduleName-v$moduleVersion.zip"
         $zipFilePath = "$uniqueTempPath/modules/$zipFileName"
 
-        Write-Output "Found $moduleName version $moduleVersion"
+        Write-Host "Found $moduleName version $moduleVersion"
 
-        Write-Output "Creating zip archive: $zipFilePath"
+        Write-Host "Creating zip archive: $zipFilePath"
 
         # Create zip archive in temp folder
         Compress-Archive -Path "$moduleFolder/*" -DestinationPath $zipFilePath -Force
@@ -149,7 +149,7 @@ $Env:AZCOPY_JOB_PLAN_LOCATION = "$uniqueTempPath/plan"
 
 # Copy the versioned zip files to Azure
 if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
-    Write-Output "Copying zip archives from $uniqueTempPath to Azure storage"
+    Write-Host "Copying zip archives from $uniqueTempPath to Azure storage"
     azcopy copy "$uniqueTempPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
 }
 
