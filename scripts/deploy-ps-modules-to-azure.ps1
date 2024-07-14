@@ -102,6 +102,7 @@ Write-Output "Using temp path: $uniqueTempPath"
 New-Item -Path $uniqueTempPath -type Directory | Out-Null
 New-Item -Path "$uniqueTempPath/modules" -type Directory | Out-Null
 New-Item -Path "$uniqueTempPath/logs" -type Directory | Out-Null
+New-Item -Path "$uniqueTempPath/plan" -type Directory | Out-Null
 
 # Check each module for a .psd1 file that contains a version number and if so versioned zip to temp path
 foreach ($moduleFolder in $moduleFolders) {
@@ -144,6 +145,7 @@ foreach ($moduleFolder in $moduleFolders) {
 $Env:AZCOPY_AUTO_LOGIN_TYPE = "AZCLI"
 $Env:AZCOPY_TENANT_ID = $tenantId
 $Env:AZCOPY_LOG_LOCATION = "$uniqueTempPath/logs"
+$Env:AZCOPY_JOB_PLAN_LOCATION = "$uniqueTempPath/plan"
 
 # Copy the versioned zip files to Azure
 if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
