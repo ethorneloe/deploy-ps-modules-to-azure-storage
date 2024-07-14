@@ -98,7 +98,10 @@ $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
 
 Write-Output "Using temp path: $uniqueTempPath"
 
+# Create required directories
 New-Item -Path $uniqueTempPath -type Directory | Out-Null
+New-Item -Path "$uniqueTempPath/modules" -type Directory | Out-Null
+New-Item -Path "$uniqueTempPath/logs" -type Directory | Out-Null
 
 # Check each module for a .psd1 file that contains a version number and if so versioned zip to temp path
 foreach ($moduleFolder in $moduleFolders) {
