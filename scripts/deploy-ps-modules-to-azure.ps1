@@ -7,7 +7,7 @@
     then uploads the zip files to a specified Azure Storage container. It checks each module
     for valid .psd1 and .psm1 files and reads version information from the .psd1 file for naming the zip files.
 
-.PARAMETER sourcePath
+.PARAMETER moduleSourcePath
     Path within the Git repository containing the PowerShell module folders.
 
 .PARAMETER storageAccountContainerName
@@ -23,8 +23,8 @@
     Specifies whether to overwrite existing files in Azure Storage. Accepted values: 'true', 'false'.
 
 .EXAMPLE
-    .\deploy-ps-modules-to-azure.ps1 -sourcePath './modules' -storageAccountContainerName 'psmodules' -storageAccountName 'examplestorage' -tenantId 'your-tenant-id' -overwrite 'false'
-    Deploys all PowerShell modules from the './modules' directory to the 'psmodules' container in the 'examplestorage' Azure Storage account.
+    .\deploy-ps-modules-to-azure.ps1 -moduleSourcePath '.\modules' -outputPath 'C:\temp\deploy-ps-modules-to-azure' -storageAccountContainerName 'psmodules' -storageAccountName 'examplestorage' -tenantId 'your-tenant-id' -overwrite 'false'
+    Deploys all PowerShell modules from the '.\modules' directory to the 'psmodules' container in the 'examplestorage' Azure Storage account.
 
 .NOTES
     Ensure that Azure CLI and AzCopy are present.
@@ -38,7 +38,10 @@
 param (
 
     [Parameter(Mandatory = $true)]
-    [string]$sourcePath,
+    [string]$moduleSourcePath,
+
+    [Parameter(Mandatory = $true)]
+    [string]$outputPath,
 
     [Parameter(Mandatory = $true)]
     [string]$storageAccountContainerName,
@@ -53,7 +56,7 @@ param (
     [string]$overwrite = 'false'
 )
 
-Write-Host "Using module source path: $sourcePath"
+Write-Host "Using module source path: $moduleSourcePath"
 
 # Check the overwrite param for true/false and set to false if null or empty
 if ([string]::IsNullOrEmpty($overwrite)) { $overwrite = 'false' }
@@ -66,7 +69,7 @@ if ( ($overwrite -ne 'true') -and ($overwrite -ne 'false') ) {
 $moduleFolders = [System.Collections.ArrayList]@()
 
 # Get all directories recursively
-$directories = Get-ChildItem -Path $sourcePath -Directory -Recurse
+$directories = Get-ChildItem -Path $moduleSourcePath -Directory -Recurse
 
 # Check for folders that contain .psd1 and .psm1 files as a basic module check
 foreach ($directory in $directories) {
@@ -87,22 +90,12 @@ if ($moduleFolders.count -eq 0) {
 Write-Host "Found module folders:"
 Write-Host $moduleFolders
 
-# Configure a unique temp directory for holding zip files
-$now = Get-Date
-$dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-$scriptPath = $MyInvocation.MyCommand.Path
-$scriptNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($scriptPath)
-$tempFolderName = "$($scriptNameWithoutExtension)_$($dateTimeString)"
-$tempBasePath = [System.IO.Path]::GetTempPath()
-$uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
-
-Write-Host "Using temp path: $uniqueTempPath"
+Write-Host "Using temp path: $outputPath"
 
 # Create required directories
-New-Item -Path $uniqueTempPath -type Directory | Out-Null
-New-Item -Path "$uniqueTempPath/modules" -type Directory | Out-Null
-New-Item -Path "$uniqueTempPath/logs" -type Directory | Out-Null
-New-Item -Path "$uniqueTempPath/plan" -type Directory | Out-Null
+New-Item -Path "$outputPath/modules" -type Directory | Out-Null
+New-Item -Path "$outputPath/logs" -type Directory | Out-Null
+New-Item -Path "$outputPath/plan" -type Directory | Out-Null
 
 # Check each module for a .psd1 file that contains a version number and if so versioned zip to temp path
 foreach ($moduleFolder in $moduleFolders) {
@@ -127,7 +120,7 @@ foreach ($moduleFolder in $moduleFolders) {
         # Configure filenames and paths for compression
         $moduleName = $psd1File.BaseName
         $zipFileName = "$moduleName-v$moduleVersion.zip"
-        $zipFilePath = "$uniqueTempPath/modules/$zipFileName"
+        $zipFilePath = "$outputPath/modules/$zipFileName"
 
         Write-Host "Found $moduleName version $moduleVersion"
 
@@ -144,14 +137,11 @@ foreach ($moduleFolder in $moduleFolders) {
 # Configure env vars for using the Azure CLI OAuth token from the azure/login action, and for redirecting logs files.
 $Env:AZCOPY_AUTO_LOGIN_TYPE = "AZCLI"
 $Env:AZCOPY_TENANT_ID = $tenantId
-$Env:AZCOPY_LOG_LOCATION = "$uniqueTempPath/logs"
-$Env:AZCOPY_JOB_PLAN_LOCATION = "$uniqueTempPath/plan"
+$Env:AZCOPY_LOG_LOCATION = "$outputPath/logs"
+$Env:AZCOPY_JOB_PLAN_LOCATION = "$outputPath/plan"
 
 # Copy the versioned zip files to Azure
 if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
-    Write-Host "Copying zip archives from "$uniqueTempPath/modules" to Azure storage"
-    ((azcopy copy "$uniqueTempPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite 2>&1 ) -join "`r`n") + "`r`n"
+    Write-Host "Copying zip archives from "$outputPath/modules" to Azure storage"
+    azcopy copy "$outputPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
 }
-
-# Return the temp path for other steps in action.yml to consume.  Clean up is done after the azcopy log has been uploaded as an artifact.
-return $uniqueTempPath

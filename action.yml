@@ -28,32 +28,47 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Create temp directory for script output
+      id: create-temp-output-path
+      run: |
+        # Configure a unique temp directory for holding zip files
+        $now = Get-Date
+        $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
+        $scriptPath = $MyInvocation.MyCommand.Path
+        $scriptNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($scriptPath)
+        $tempFolderName = "$($scriptNameWithoutExtension)_$($dateTimeString)"
+        $tempBasePath = [System.IO.Path]::GetTempPath()
+        $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
+        New-Item -Path $uniqueTempPath -type Directory | Out-Null
+        Write-Output "outputPath=$uniqueTempPath" >> $env:GITHUB_OUTPUT
+
+      shell: pwsh
+
     # Perform basic checks on module folders and upload to versioned zip files to Azure Storage
     - name: Upload modules to Azure storage
-      id: upload-modules-to-azure-storage
       run: |
         # Execute deploy-ps-modules-to-azure.ps1
         $params = @{
-            sourcePath = '${{ inputs.repo-powershell-module-path }}'
+            moduleSourcePath = '${{ inputs.repo-powershell-module-path }}'
+            outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
             storageAccountContainerName = '${{ inputs.storage-account-container-name }}'
             storageAccountName = '${{ inputs.storage-account-name }}'
             tenantId = '${{ inputs.tenant-id }}'
             overwrite = '${{ inputs.overwrite }}'
         }
-        $tempdir = ${{ github.action_path }}/scripts/deploy-ps-modules-to-azure.ps1 @params
-        Write-Output "tempdir=$tempdir" >> $env:GITHUB_OUTPUT
+        ${{ github.action_path }}/scripts/deploy-ps-modules-to-azure.ps1 @params
 
       shell: pwsh
 
     - name: Clean up temp folder
       run: |
-        $uniqueTempPath = '${{ steps.upload-modules-to-azure-storage.outputs.tempdir }}'
-        Write-Output "Deleting $uniqueTempPath"
+        $outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
+        Write-Output "Deleting $outputPath"
         try {
-            Remove-Item -Path $uniqueTempPath -Recurse -Confirm:$false -Force -ErrorAction Stop
+            Remove-Item -Path $outputPath -Recurse -Confirm:$false -Force -ErrorAction Stop
         }
         catch {
-            Write-Warning "Unable to remove $uniqueTempPath"
+            Write-Warning "Unable to remove $outputPath"
         }
 
       shell: pwsh
