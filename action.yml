@@ -13,19 +13,24 @@ inputs:
     description: "Azure tenant id"
     required: true
   overwrite:
-    description: "An option to force files to be overwritten when they already exist in Azure storage."
+    description: "An option to force files to be overwritten when they already exist in Azure storage"
     required: false
     default: "false"
   repo-powershell-module-path:
-    description: "Path within your git repo containing the powershell module folder or folders."
+    description: "Path within your git repo containing the powershell module folder or folders"
     required: true
     default: "./"
+
+outputs:
+  tempdir:
+    description: "The temp directory used to store versioned zip files and the azcopy log file"
 
 runs:
   using: "composite"
   steps:
     # Perform basic checks on module folders and upload to versioned zip files to Azure Storage
     - name: Upload modules to Azure storage
+      id: upload-modules-to-azure-storage
       run: |
         # Execute deploy-ps-modules-to-azure.ps1
         $params = @{
@@ -35,7 +40,21 @@ runs:
             tenantId = '${{ inputs.tenant-id }}'
             overwrite = '${{ inputs.overwrite }}'
         }
-        ${{ github.action_path }}/deploy-ps-modules-to-azure.ps1 @params
+        $tempdir = ${{ github.action_path }}/scripts/deploy-ps-modules-to-azure.ps1 @params
+        Write-Output "tempdir=$tempdir" >> $env:GITHUB_OUTPUT
+
+      shell: pwsh
+
+    - name: Clean up temp folder
+      run: |
+        $uniqueTempPath = '${{ steps.upload-modules-to-azure-storage.outputs.tempdir }}'
+        Write-Output "Deleting $uniqueTempPath"
+        try {
+            Remove-Item -Path $uniqueTempPath -Recurse -Confirm:$false -Force -ErrorAction Stop
+        }
+        catch {
+            Write-Warning "Unable to remove $uniqueTempPath"
+        }
 
       shell: pwsh
 

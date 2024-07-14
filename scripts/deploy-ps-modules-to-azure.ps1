@@ -33,7 +33,10 @@
     GitHub actions have been executed as it leverages the repo structure and the existing Azure CLI logon context.
 #>
 
+[CmdletBinding(SupportsShouldProcess = $true)]
+
 param (
+
     [Parameter(Mandatory = $true)]
     [string]$sourcePath,
 
@@ -120,7 +123,7 @@ foreach ($moduleFolder in $moduleFolders) {
         # Configure filenames and paths for compression
         $moduleName = $psd1File.BaseName
         $zipFileName = "$moduleName-v$moduleVersion.zip"
-        $zipFilePath = "$uniqueTempPath/$zipFileName"
+        $zipFilePath = "$uniqueTempPath/modules/$zipFileName"
 
         Write-Output "Found $moduleName version $moduleVersion"
 
@@ -134,12 +137,16 @@ foreach ($moduleFolder in $moduleFolders) {
     }
 }
 
-# Copy the versioned zip files to Azure
-Write-Output "Copying zip acrhives from $uniqueTempPath to Azure storage"
+# Configure env vars for using the Azure CLI OAuth token from the azure/login action, and for redirecting logs files.
 $Env:AZCOPY_AUTO_LOGIN_TYPE = "AZCLI"
 $Env:AZCOPY_TENANT_ID = $tenantId
-azcopy copy "$uniqueTempPath/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
+$Env:AZCOPY_LOG_LOCATION = "$uniqueTempPath/logs"
 
-# Clean up the temp folder
-Write-Output "Deleting $uniqueTempPath"
-Remove-Item -Path $uniqueTempPath -Recurse -Confirm:$false -Force
+# Copy the versioned zip files to Azure
+if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", "Upload files")) {
+    Write-Output "Copying zip archives from $uniqueTempPath to Azure storage"
+    azcopy copy "$uniqueTempPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
+}
+
+# Return the temp path for other steps in action.yml to consume.  Clean up is done after the azcopy log has been uploaded as an artifact.
+return $uniqueTempPath
