@@ -61,7 +61,7 @@ runs:
 
     - uses: actions/upload-artifact@v4
       with:
-        name: "azcopylog.zip"
+        name: "azcopylog"
         path: ${{ steps.create-temp-output-path.outputs.outputPath }}/logs/*.zip
         retention-days: 14
 

@@ -146,8 +146,7 @@ if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", 
     Write-Host "Copying zip archives from "$outputPath/modules" to Azure storage"
     azcopy copy "$outputPath/modules/*" "https://$storageAccountName.blob.core.windows.net/$storageAccountContainerName" --overwrite=$overwrite
 
-    #$zipFileName = "azcopylog.zip"
-    #$zipFilePath = "$outputPath/logs/$zipFileName"
-    #Compress-Archive -Path "$outputPath/logs/*" -DestinationPath $zipFilePath -Force
-    Get-ChildItem -path "$outputPath/logs"
+    $zipFileName = "azcopylog.zip"
+    $zipFilePath = "$outputPath/logs/$zipFileName"
+    Compress-Archive -Path "$outputPath/logs/*" -DestinationPath $zipFilePath -Force
 }
