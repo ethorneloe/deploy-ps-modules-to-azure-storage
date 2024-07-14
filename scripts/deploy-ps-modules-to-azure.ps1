@@ -148,5 +148,5 @@ if ($PSCmdlet.ShouldProcess("$storageAccountName/$storageAccountContainerName", 
 
     $zipFileName = "azcopylog.zip"
     $zipFilePath = "$outputPath/logs/$zipFileName"
-    Compress-Archive -Path "$outputPath/logs*" -DestinationPath $zipFilePath -Force
+    Compress-Archive -Path "$outputPath/logs/*" -DestinationPath $zipFilePath -Force
 }
