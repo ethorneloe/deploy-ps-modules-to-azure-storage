@@ -1,9 +1,14 @@
 BeforeAll {
 
     # Setup test environment
-    $testModulePath = "C:\temp\test-modules"
-    Remove-Item -Path $testModulePath -Recurse -Force -ErrorAction SilentlyContinue
-    New-Item -Path $testModulePath -ItemType Directory -Force | Out-Null
+    $now = Get-Date
+    $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
+    $scriptPath = $MyInvocation.MyCommand.Path
+    $scriptNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($scriptPath)
+    $tempFolderName = "$($scriptNameWithoutExtension)_$($dateTimeString)"
+    $tempBasePath = [System.IO.Path]::GetTempPath()
+    $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
+    New-Item -Path $uniqueTempPath -type Directory | Out-Null
 
     # Create valid module folder
     $validModulePath = Join-Path -Path $testModulePath -ChildPath "ValidModule"
@@ -86,4 +91,8 @@ Describe "deploy-ps-modules-to-azure.ps1" {
         Assert-MockCalled -CommandName azcopy -Exactly -Times 1
         Assert-MockCalled -CommandName Compress-Archive -Exactly -Times 1
     }
+}
+
+AfterAll {
+    Remove-Item -Path $uniqueTempPath -Recurse -Confirm:$false -Force -ErrorAction Stop
 }
