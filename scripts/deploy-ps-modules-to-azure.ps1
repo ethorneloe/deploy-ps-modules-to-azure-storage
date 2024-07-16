@@ -8,7 +8,10 @@
     for valid .psd1 and .psm1 files and reads version information from the .psd1 file for naming the zip files.
 
 .PARAMETER moduleSourcePath
-    Path within the Git repository containing the PowerShell module folders.
+    Path containing the PowerShell module folders.
+
+.PARAMETER outputPath
+    Path for compressed module folders, and AzCopy logs.
 
 .PARAMETER storageAccountContainerName
     Name of the Azure Storage container where the zipped modules will be stored.

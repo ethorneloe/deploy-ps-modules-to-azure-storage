@@ -21,10 +21,6 @@ inputs:
     required: true
     default: "./"
 
-outputs:
-  tempdir:
-    description: "The temp directory used to store versioned zip files and the azcopy log file"
-
 runs:
   using: "composite"
   steps:
