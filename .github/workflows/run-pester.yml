@@ -16,6 +16,6 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          Invoke-Pester ./tests
+          Invoke-Pester ./tests -Output Detailed
 
         shell: pwsh
