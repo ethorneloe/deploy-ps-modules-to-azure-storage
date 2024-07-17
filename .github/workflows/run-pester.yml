@@ -16,6 +16,6 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          get-childitem -filter *.tests.ps1 | Invoke-Pester
+          Invoke-Pester ./tests
 
         shell: pwsh

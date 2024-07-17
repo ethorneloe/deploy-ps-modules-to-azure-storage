@@ -43,15 +43,27 @@ runs:
     - name: Upload modules to Azure storage
       run: |
         # Execute deploy-ps-modules-to-azure.ps1
+
+        $overwrite = '${{ inputs.overwrite }}'.ToLower().Trim()
+
+        switch ($overwrite) {
+            'true' { $overwrite = $true }
+            'false' { $overwrite = $false }
+            default {
+                throw "The value defined for the overwrite parameter (overwrite=$overwrite) could not be converted to a boolean value. Valid values are 'True', 'true', 'False', 'false'."
+            }
+        }
+
         $params = @{
             moduleSourcePath = '${{ inputs.repo-powershell-module-path }}'
             outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
             storageAccountContainerName = '${{ inputs.storage-account-container-name }}'
             storageAccountName = '${{ inputs.storage-account-name }}'
             tenantId = '${{ inputs.tenant-id }}'
-            overwrite = '${{ inputs.overwrite }}'
+            overwrite = $overwrite
         }
-        ${{ github.action_path }}/scripts/deploy-ps-modules-to-azure.ps1 @params
+        . '${{ github.action_path }}/functions/deploy-ps-modules-to-azure.ps1'
+        Deploy-PsModulesToAzure @params -InformationAction Continue
 
       shell: pwsh
 
