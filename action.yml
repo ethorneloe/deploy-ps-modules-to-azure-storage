@@ -30,9 +30,7 @@ runs:
         # Configure temp output path for zip files and logs
         $now = Get-Date
         $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-        $scriptPath = $MyInvocation.MyCommand.Path
-        $scriptNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($scriptPath)
-        $tempFolderName = "$($scriptNameWithoutExtension)_$($dateTimeString)"
+        $tempFolderName = "deploy-ps-modules-to-azure_$($dateTimeString)"
         $tempBasePath = [System.IO.Path]::GetTempPath()
         $uniqueTempPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
         New-Item -Path $uniqueTempPath -type Directory | Out-Null
