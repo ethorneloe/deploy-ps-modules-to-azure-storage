@@ -12,8 +12,6 @@ on:
       - "**/*.ps1"
       - ".github/workflows/run-pester.yml"
 
-paths:
-
 jobs:
   test:
     runs-on: ubuntu-latest
