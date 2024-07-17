@@ -3,8 +3,16 @@ name: Run Pester Tests
 on:
   push:
     branches: [main]
+    paths:
+      - "**/*.ps1"
+      - ".github/workflows/run-pester.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "**/*.ps1"
+      - ".github/workflows/run-pester.yml"
+
+paths:
 
 jobs:
   test:
