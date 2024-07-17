@@ -12,28 +12,6 @@ BeforeAll {
     New-item -Path $tempModuleSourcePath -type Directory | Out-Null
     New-item -Path $tempOutputPath -type Directory | Out-Null
 
-    # Create valid module folder
-    $validModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "ValidModule"
-    New-Item -Path $validModulePath -ItemType Directory -Force | Out-Null
-    New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
-    New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psm1") -ItemType File -Force | Out-Null
-
-    # Create module folder with only .psm1
-    $onlyPsm1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "OnlyPsm1Module"
-    New-Item -Path $onlyPsm1ModulePath -ItemType Directory -Force | Out-Null
-    New-Item -Path (Join-Path -Path $onlyPsm1ModulePath -ChildPath "OnlyPsm1Module.psm1") -ItemType File -Force | Out-Null
-
-    # Create module folder with only .psd1
-    $onlyPsd1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "OnlyPsd1Module"
-    New-Item -Path $onlyPsd1ModulePath -ItemType Directory -Force | Out-Null
-    New-Item -Path (Join-Path -Path $onlyPsd1ModulePath -ChildPath "OnlyPsd1Module.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
-
-    # Create invalid .psd1 file without ModuleVersion
-    $invalidPsd1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "InvalidPsd1Module"
-    New-Item -Path $invalidPsd1ModulePath -ItemType Directory -Force | Out-Null
-    New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psd1") -ItemType File -Force -Value "NoVersionInfo = '1.1.0'" | Out-Null
-    New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psm1") -ItemType File -Force | Out-Null
-
     # Dot source in the function
     . ".\functions\deploy-ps-modules-to-azure.ps1"
 
