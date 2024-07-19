@@ -4,12 +4,15 @@ param (
     [string]$functionFullName
 )
 
+$function = $functionFullName | get-item | Select-Object -ExpandProperty BaseName
+$functionName = $function | Select-Object -ExpandProperty Name
+
 BeforeAll {
 
     # Setup test environment
     $now = Get-Date
     $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-    $baseName = $functionFullName | get-item | Select-Object -ExpandProperty BaseName
+    $baseName = $function | Select-Object -ExpandProperty BaseName
     $tempFolderName = "$($baseName)_$($dateTimeString)"
     $tempBasePath = [System.IO.Path]::GetTempPath()
     $tempTestPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
@@ -33,7 +36,7 @@ BeforeAll {
     }
 }
 
-Describe "Test Function $functionFullName" {
+Describe "Test Function $functionName" {
 
     BeforeEach {
 
