@@ -1,7 +1,7 @@
 param (
     # The full path to the function we are testing
     [Parameter(Mandatory = $true)]
-    [string]$functionFullPath
+    [string]$functionFullName
 )
 
 BeforeAll {
@@ -9,7 +9,7 @@ BeforeAll {
     # Setup test environment
     $now = Get-Date
     $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-    $baseName = $functionFullPath | get-item | Select-Object -ExpandProperty BaseName
+    $baseName = $functionFullName | get-item | Select-Object -ExpandProperty BaseName
     $tempFolderName = "$($baseName)_$($dateTimeString)"
     $tempBasePath = [System.IO.Path]::GetTempPath()
     $tempTestPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
@@ -20,7 +20,7 @@ BeforeAll {
     New-item -Path $tempOutputPath -type Directory | Out-Null
 
     # Dot source in the function
-    . $functionFullPath
+    . $functionFullName
 
     # Params for the script executions
     $script:params = @{
