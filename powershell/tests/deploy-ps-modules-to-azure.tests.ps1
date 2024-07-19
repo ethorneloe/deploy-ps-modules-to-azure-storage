@@ -1,4 +1,5 @@
 param (
+    # The full path to the function we are testing
     [Parameter(Mandatory = $true)]
     [string]$functionFullPath
 )

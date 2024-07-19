@@ -22,6 +22,11 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          Invoke-Pester "${{ github.workspace }}/powershell/tests/*" -Output Detailed
+          $functionBaseName = 'deploy-ps-modules-to-azure'
+          $functionFullName = "${{ github.workspace }}/tests/$functionBaseName.ps1"
+          $pesterTestFullName = "${{ github.workspace }}/tests/$functionBaseName.tests.ps1"
+
+          $pesterContainer = New-PesterContainer -Path $pesterTestFullName -Data @{functionFullPath = $functionFullPath}
+          Invoke-Pester -Container $pesterContainer -Output Detailed
 
         shell: pwsh
