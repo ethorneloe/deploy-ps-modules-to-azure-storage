@@ -22,6 +22,6 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          Invoke-Pester ./tests -Output Detailed
+          Invoke-Pester "${{ github.workspace }}/powershell/tests/*" -Output Detailed
 
         shell: pwsh

@@ -1,9 +1,15 @@
+param (
+    [Parameter(Mandatory = $true)]
+    [string]$functionFullPath
+)
+
 BeforeAll {
 
     # Setup test environment
     $now = Get-Date
     $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-    $tempFolderName = "deploy-ps-modules-to-azure_$($dateTimeString)"
+    $baseName = $functionFullPath | get-item | Select-Object -ExpandProperty BaseName
+    $tempFolderName = "$($baseName)_$($dateTimeString)"
     $tempBasePath = [System.IO.Path]::GetTempPath()
     $tempTestPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
     New-Item -Path $tempTestPath -type Directory | Out-Null
@@ -13,7 +19,7 @@ BeforeAll {
     New-item -Path $tempOutputPath -type Directory | Out-Null
 
     # Dot source in the function
-    . ".\functions\deploy-ps-modules-to-azure.ps1"
+    . $functionFullPath
 
     # Params for the script executions
     $script:params = @{
