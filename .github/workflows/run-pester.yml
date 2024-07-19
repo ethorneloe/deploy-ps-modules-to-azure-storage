@@ -26,7 +26,7 @@ jobs:
           $functionFullName = "${{ github.workspace }}/powershell/functions/$functionBaseName.ps1"
           $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$functionBaseName.tests.ps1"
 
-          $pesterContainer = New-PesterContainer -Path $pesterTestFullName -Data @{functionFullPath = $functionFullPath}
+          $pesterContainer = New-PesterContainer -Path $pesterTestFullName -Data @{functionFullName = $functionFullName}
           Invoke-Pester -Container $pesterContainer -Output Detailed
 
         shell: pwsh
