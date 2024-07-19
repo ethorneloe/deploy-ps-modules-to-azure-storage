@@ -4,7 +4,7 @@ param (
     [string]$functionFullName
 )
 
-$function = $functionFullName | get-item | Select-Object -ExpandProperty BaseName
+$function = get-item $functionFullName
 $functionName = $function | Select-Object -ExpandProperty Name
 
 BeforeAll {
