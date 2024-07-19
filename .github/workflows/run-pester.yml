@@ -22,7 +22,7 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          $functionBaseName = 'deploy-ps-modules-to-azure'
+          $functionBaseName = 'Deploy-PsModulesToAzure'
           $functionFullName = "${{ github.workspace }}/powershell/functions/$functionBaseName.ps1"
           $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$functionBaseName.tests.ps1"
 

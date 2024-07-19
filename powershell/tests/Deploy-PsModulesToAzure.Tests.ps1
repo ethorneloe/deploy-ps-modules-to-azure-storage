@@ -33,7 +33,7 @@ BeforeAll {
     }
 }
 
-Describe "deploy-ps-modules-to-azure.ps1" {
+Describe "Test Function $baseName" {
 
     BeforeEach {
 
