@@ -33,7 +33,7 @@ BeforeAll {
     }
 }
 
-Describe "Test Function $baseName" {
+Describe "Test Function $functionFullName" {
 
     BeforeEach {
 
