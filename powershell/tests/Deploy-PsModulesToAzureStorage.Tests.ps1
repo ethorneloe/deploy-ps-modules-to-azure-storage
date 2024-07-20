@@ -8,8 +8,8 @@ BeforeAll {
     # Setup test environment
     $now = Get-Date
     $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-    $baseName = $mainFunction | Select-Object -ExpandProperty BaseName
-    $tempFolderName = "$($baseName)_$($dateTimeString)"
+    $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
+    $tempFolderName = "$($mainFunctionBaseName)_$($dateTimeString)"
     $tempBasePath = [System.IO.Path]::GetTempPath()
     $tempTestPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
     New-Item -Path $tempTestPath -type Directory | Out-Null
@@ -48,17 +48,17 @@ Describe "Test Function $mainFunctionName" {
         New-Item -Path $onlyPsm1ModulePath -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path -Path $onlyPsm1ModulePath -ChildPath "OnlyPsm1Module.psm1") -ItemType File -Force | Out-Null
 
-        { Deploy-PsModulesToAzure @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
 
         # Create module folder with only .psd1
         $onlyPsd1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "OnlyPsd1Module"
         New-Item -Path $onlyPsd1ModulePath -ItemType Directory -Force | Out-Null
         New-Item -Path (Join-Path -Path $onlyPsd1ModulePath -ChildPath "OnlyPsd1Module.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
 
-        { Deploy-PsModulesToAzure @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
 
         Remove-Item -Path "$tempModuleSourcePath/*" -Recurse -Force -Confirm:$false
-        { Deploy-PsModulesToAzure @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
     }
 
     It "should throw an error if a module does not contain a valid module version key/value pair in the .psd1 file" {
@@ -69,7 +69,7 @@ Describe "Test Function $mainFunctionName" {
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psd1") -ItemType File -Force -Value "NoVersionInfo = '1.1.0'" | Out-Null
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psm1") -ItemType File -Force | Out-Null
 
-        { Deploy-PsModulesToAzure @params -WhatIf } | Should -Throw "Unable to complete deployment for module InvalidPsd1Module. ModuleVersion is not present or not set correctly in the .psd1 file.  Expected format is ModuleVersion = 'x.y.z'"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "Unable to complete deployment for module InvalidPsd1Module. ModuleVersion is not present or not set correctly in the .psd1 file.  Expected format is ModuleVersion = 'x.y.z'"
     }
 
     It "should read module version from .psd1 file and create zip archive" {
@@ -83,7 +83,7 @@ Describe "Test Function $mainFunctionName" {
         New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
         New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psm1") -ItemType File -Force | Out-Null
 
-        Deploy-PsModulesToAzure @params -WhatIf
+        & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip
         $zipFiles | Measure-Object | Select-Object -ExpandProperty Count | Should -BeGreaterThan 0
         foreach ($zipfile in $zipFiles) {
