@@ -36,7 +36,7 @@
     GitHub actions have been executed as it leverages the repo structure and the existing Azure CLI logon context.
 #>
 
-function Deploy-PsModulesToAzure {
+function Deploy-PsModulesToAzureStorage {
 
     [CmdletBinding(SupportsShouldProcess = $true)]
 
