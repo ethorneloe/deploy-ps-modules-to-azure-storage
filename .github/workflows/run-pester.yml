@@ -22,11 +22,10 @@ jobs:
 
       - name: Run Pester Tests
         run: |
-          $functionBaseName = 'Deploy-PsModulesToAzure'
-          $functionFullName = "${{ github.workspace }}/powershell/functions/$functionBaseName.ps1"
-          $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$functionBaseName.tests.ps1"
+          $mainFunction = Get-ChildItem -Path "${{ github.workspace }}/powershell/functions/main" -filter "*.ps1"
+          $mainFunctionBaseName = $mainFunction.BaseName
+          $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$mainFunctionBaseName.Tests.ps1"
 
-          $pesterContainer = New-PesterContainer -Path $pesterTestFullName -Data @{functionFullName = $functionFullName}
-          Invoke-Pester -Container $pesterContainer -Output Detailed
+          Invoke-Pester -Path $pesterTestFullName -Output Detailed
 
         shell: pwsh

@@ -1,18 +1,13 @@
-param (
-    # The full path to the function we are testing
-    [Parameter(Mandatory = $true)]
-    [string]$functionFullName
-)
 
-$function = get-item $functionFullName
-$functionName = $function | Select-Object -ExpandProperty Name
+$mainFunction = Get-ChildItem "$PSScriptRoot../functions/main/" -Filter "*.ps1"
+$mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
 
 BeforeAll {
 
     # Setup test environment
     $now = Get-Date
     $dateTimeString = $now.ToString("yyyy-MM-dd-HH-mm-ss-fff")
-    $baseName = $function | Select-Object -ExpandProperty BaseName
+    $baseName = $mainFunction | Select-Object -ExpandProperty BaseName
     $tempFolderName = "$($baseName)_$($dateTimeString)"
     $tempBasePath = [System.IO.Path]::GetTempPath()
     $tempTestPath = [System.IO.Path]::Combine($tempBasePath, $tempFolderName)
@@ -23,7 +18,7 @@ BeforeAll {
     New-item -Path $tempOutputPath -type Directory | Out-Null
 
     # Dot source in the function
-    . $functionFullName
+    . $mainFunction.FullName
 
     # Params for the script executions
     $script:params = @{
@@ -36,7 +31,7 @@ BeforeAll {
     }
 }
 
-Describe "Test Function $functionName" {
+Describe "Test Function $mainFunctionName" {
 
     BeforeEach {
 
