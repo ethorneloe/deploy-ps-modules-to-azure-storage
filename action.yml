@@ -63,12 +63,12 @@ runs:
             overwrite = $overwrite
         }
 
-        $functions = Get-ChildItem -Path '${{ github.action_path }}/functions' -Recurse -Filter "*.ps1"
+        $functions = Get-ChildItem -Path '${{ github.workspace }}/functions' -Recurse -Filter "*.ps1"
         $functions | ForEach-Object {
           . $_.FullName
         }
 
-        $mainFunction = Get-ChildItem -Path '${{ github.action_path }}/functions/main' -Filter "*.ps1"
+        $mainFunction = Get-ChildItem -Path '${{ github.workspace }}/functions/main' -Filter "*.ps1"
         $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
 
         & $mainFunctionBaseName @params -InformationAction Continue
