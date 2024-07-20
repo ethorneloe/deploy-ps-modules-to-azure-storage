@@ -32,7 +32,6 @@ with:
 Your Azure tenant id.
 ```yaml
 with:
-  # exclude one rule 
   tenant-id: 'your-tenant-id'
 ```
 
