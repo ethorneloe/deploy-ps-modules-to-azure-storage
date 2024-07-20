@@ -1,5 +1,6 @@
-
-$mainFunction = Get-ChildItem "$PSScriptRoot../functions/main/" -Filter "*.ps1"
+$parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
+$mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
+$mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
 $mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
 
 BeforeAll {
