@@ -71,7 +71,7 @@ with:
 ```
 
 ## overwrite
-An option to force files to be overwritten when they already exist in Azure storage.
+An option to force files to be overwritten when they already exist in Azure storage. If unspecified the default is false.
 ```yaml
 with:
   overwrite: true 
