@@ -85,6 +85,5 @@ with:
 The path within your git repo containing the powershell module folder or folders.
 ```yaml
 with:
-  # Include one rule
   repo-powershell-module-path: 'your/path'
 ```
