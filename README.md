@@ -39,7 +39,7 @@ jobs:
 ```
 
 # Use Case
-Changes to your custom script Powershell modules need to be deployed to an Azure storage blob container as .zip files based on the `ModuleVersion` set in the .psd1 files of the modules. For example, internally developed PowerShell modules that are required to be kept as internal or private repos, and these need to be available for use by other Azure resources such as Azure functions or container apps jobs on the same private vnet as the storage account.
+Changes to your custom Powershell script modules need to be deployed to an Azure storage blob container as .zip files based on the `ModuleVersion` set in the .psd1 files of the modules. For example, internally developed PowerShell modules that are required to be kept as internal or private repos, and these need to be available for use by other Azure resources such as Azure functions or container apps jobs on the same private vnet as the storage account.
 
 # Requirements
 - An Azure subscription with a storage account and blob container configured.
