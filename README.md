@@ -6,8 +6,36 @@ A GitHub composite action for deploying PowerShell modules within your repo into
 
 # Example
 ```yaml
-with:
-  storage-account-name: 'your storage account name'
+name: Test Deployment
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-powershell-modules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID}}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy PowerShell Modules to Azure Storage
+        uses: ethorneloe/deploy-ps-modules-to-azure-storage@main
+        with:
+          storage-account-name: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+          storage-account-container-name: ${{ vars.AZURE_STORAGE_ACCOUNT_CONTAINER_NAME }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          repo-powershell-module-path: "./powershell/modules"
 ```
 
 # Use case
