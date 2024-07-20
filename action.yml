@@ -68,7 +68,7 @@ runs:
           . $_.FullName
         }
 
-        $mainFunction = ${{ github.action_path }}/functions/main' -Filter "*.ps1"
+        $mainFunction = '${{ github.action_path }}/functions/main' -Filter "*.ps1"
         $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
 
         & $mainFunctionBaseName @params -InformationAction Continue
