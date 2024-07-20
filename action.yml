@@ -45,8 +45,10 @@ runs:
         $overwrite = '${{ inputs.overwrite }}'.ToLower().Trim()
 
         switch ($overwrite) {
-            'true' { $overwrite = $true }
+            'true'  { $overwrite = $true }
             'false' { $overwrite = $false }
+            $null   { $overwrite = $false }
+            ''      { $overwrite = $false }
             default {
                 throw "The value defined for the overwrite parameter (overwrite=$overwrite) could not be converted to a boolean value. Valid values are 'True', 'true', 'False', 'false'."
             }
@@ -60,8 +62,16 @@ runs:
             tenantId = '${{ inputs.tenant-id }}'
             overwrite = $overwrite
         }
-        . '${{ github.action_path }}/functions/deploy-ps-modules-to-azure.ps1'
-        Deploy-PsModulesToAzure @params -InformationAction Continue
+
+        $functions = Get-ChildItem -Path '${{ github.action_path }}/functions' -Recurse -Filter "*.ps1"
+        $functions | ForEach-Object {
+          . $_.FullName
+        }
+
+        $mainFunction = ${{ github.action_path }}/functions/main' -Filter "*.ps1"
+        $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
+
+        & $mainFunctionBaseName @params -InformationAction Continue
 
       shell: pwsh
 
