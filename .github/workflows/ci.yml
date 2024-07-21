@@ -80,7 +80,7 @@ jobs:
               --resource-group $RESOURCE_GROUP_NAME \
               --location $LOCATION \
               --kind BlobStorage \
-              --access-tier Hot
+              --access-tier Hot \
               --sku Standard_LRS
 
             echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME..."
