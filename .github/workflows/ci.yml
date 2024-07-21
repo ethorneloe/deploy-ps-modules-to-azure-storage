@@ -47,13 +47,9 @@ jobs:
       - name: Generate names for temp storage account and blob container
         id: azure-storage-names
         run: |
-          $mainFunction = Get-ChildItem -Path "${{ github.workspace }}/powershell/functions/main" -filter "*.ps1"
-          $mainFunctionBaseName = $mainFunction.BaseName
-          if ($mainFunctionBaseName.length -gt 18) {
-            $mainFunctionBaseName = $mainFunctionBaseName.Substring(0, 18)
-          }
-          $randomNumber = Get-Random -Minimum 100000 -Maximum 999999
-          $storageAccountName = "$($mainFunctionBaseName)$($randomNumber)"
+
+          $randomNumber = Get-Random -Minimum 1000000000000 -Maximum 9999999999999
+          $storageAccountName = "actionstemp$($randomNumber)"
           $storageAccountContainerName = 'psmodules'
 
           write-output "storage-account-name=$storageAccountName" >> $Env:GITHUB_OUTPUT
