@@ -96,7 +96,9 @@ function Deploy-PsModulesToAzureStorage {
     }
 
     Write-Information "Found module folders:"
-    Write-Information $moduleFolders
+    foreach ($moduleFolder in $moduleFolders) {
+        Write-Information $moduleFolders
+    }
 
     $outputObject.moduleFolders = $moduleFolders
 
