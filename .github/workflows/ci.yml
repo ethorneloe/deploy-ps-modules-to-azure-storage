@@ -68,13 +68,13 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-            echo "Clearing any existing storage accounts..."
+            echo "Clearing any existing storage accounts"
             for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
-                echo "Deleting storage account $storageAccount..."
+                echo "Deleting storage account $storageAccount"
                 az storage account delete --ids $storageAccount --yes
             done
 
-            echo "Creating new temp storage account $STORAGE_ACCOUNT_NAME..."
+            echo "Creating new temp storage account $STORAGE_ACCOUNT_NAME"
             az storage account create \
               --name $STORAGE_ACCOUNT_NAME \
               --resource-group $RESOURCE_GROUP_NAME \
@@ -84,7 +84,7 @@ jobs:
               --sku Standard_LRS \
               --output none
 
-            echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME..."
+            echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME"
             az storage container create \
               --account-name $STORAGE_ACCOUNT_NAME \
               --name $STORAGE_ACCOUNT_CONTAINER_NAME \
@@ -120,13 +120,13 @@ jobs:
               --output tsv)
 
             for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
-                echo "Deleting storage account $storageAccount..."
+                echo "Deleting storage account $storageAccount"
                 az storage account delete --ids $storageAccount --yes
             done
 
-            echo "Verifying the presence of uploaded blobs..."
+            echo "Verifying the presence of uploaded blobs"
             if [ "$blobs" -eq 0 ]; then
-              echo "::error::No blobs found in the container $STORAGE_ACCOUNT_CONTAINER_NAME."
+              echo "::error::No blobs found in the container $STORAGE_ACCOUNT_CONTAINER_NAME"
             else
-              echo "Found $blobs blobs in container $STORAGE_ACCOUNT_CONTAINER_NAME."
+              echo "Found $blobs blobs in container $STORAGE_ACCOUNT_CONTAINER_NAME"
             fi
