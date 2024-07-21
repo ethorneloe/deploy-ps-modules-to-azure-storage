@@ -1,6 +1,7 @@
 name: PowerShell Composite Action CI
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -21,7 +22,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: actions-testing
 
     steps:
       - name: Checkout repository
