@@ -81,19 +81,21 @@ jobs:
               --location $LOCATION \
               --kind BlobStorage \
               --access-tier Hot \
-              --sku Standard_LRS
+              --sku Standard_LRS \
+              --output none
 
             echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME..."
             az storage container create \
               --account-name $STORAGE_ACCOUNT_NAME \
-              --name $STORAGE_ACCOUNT_CONTAINER_NAME
+              --name $STORAGE_ACCOUNT_CONTAINER_NAME \
+              --output none
 
       - name: Test composite powershell action 1
         uses: ./
         with:
           storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
           storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
           overwrite: true
           repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
 
