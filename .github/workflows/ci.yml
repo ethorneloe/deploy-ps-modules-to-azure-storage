@@ -88,6 +88,7 @@ jobs:
             az storage container create \
               --account-name $STORAGE_ACCOUNT_NAME \
               --name $STORAGE_ACCOUNT_CONTAINER_NAME \
+              --auth-mode login \
               --output none
 
       - name: Test composite powershell action 1
@@ -115,6 +116,7 @@ jobs:
               --account-name $STORAGE_ACCOUNT_NAME \
               --container-name $STORAGE_ACCOUNT_CONTAINER_NAME \
               --query "length([])" \
+              --auth-mode login \
               --output tsv)
 
             for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
