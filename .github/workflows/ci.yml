@@ -1,0 +1,129 @@
+name: PowerShell Composite Action CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/functions/*.ps1"
+      - "**/tests/*.ps1"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/functions/*.ps1"
+      - "**/tests/*.ps1"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Pester test main powershell function
+        run: |
+          $mainFunction = Get-ChildItem -Path "${{ github.workspace }}/powershell/functions/main" -filter "*.ps1"
+          $mainFunctionBaseName = $mainFunction.BaseName
+          $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$mainFunctionBaseName.Tests.ps1"
+
+          Invoke-Pester -Path $pesterTestFullName -Output Detailed
+
+      - name: Authenticate to azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.CLIENT_ID}}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
+
+      - name: Generate names for temp storage account and blob container
+        id: azure-storage-names
+        run: |
+          $mainFunction = Get-ChildItem -Path "${{ github.workspace }}/powershell/functions/main" -filter "*.ps1"
+          $mainFunctionBaseName = $mainFunction.BaseName
+          if ($mainFunctionBaseName.length -gt 18) {
+            $mainFunctionBaseName = $mainFunctionBaseName.Substring(0, 18)
+          }
+          $randomNumber = Get-Random -Minimum 100000 -Maximum 999999
+          $storageAccountName = "$($mainFunctionBaseName)$($randomNumber)"
+          $storageAccountContainerName = 'psmodules'
+
+          write-output "storage-account-name=$storageAccountName" >> $Env:GITHUB_OUTPUT
+          write-output "storage-account-container-name=$storageAccountContainerName" >> $Env:GITHUB_OUTPUT
+
+        shell: pwsh
+
+      - name: Create azure storage account and blob container
+        uses: azure/cli@v2
+        env:
+          STORAGE_ACCOUNT_NAME: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          STORAGE_ACCOUNT_CONTAINER_NAME: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+          LOCATION: ${{ secrets.LOCATION }}
+
+        with:
+          azcliversion: latest
+          inlineScript: |
+            echo "Clearing any existing storage accounts..."
+            for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
+                echo "Deleting storage account $storageAccount..."
+                az storage account delete --ids $storageAccount --yes
+            done
+
+            echo "Creating new temp storage account $STORAGE_ACCOUNT_NAME..."
+            az storage account create /
+              --resource-group $RESOURCE_GROUP_NAME /
+              --location $LOCATION /
+              --name $STORAGE_ACCOUNT_NAME /
+              --kind BlobStorage /
+              --sku Standard_LRS
+
+            echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME..."
+            az storage container create /
+              --account-name $STORAGE_ACCOUNT_NAME
+              --name $STORAGE_ACCOUNT_CONTAINER_NAME
+
+      - name: Test composite powershell action 1
+        uses: ./
+        with:
+          storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          overwrite: true
+          repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
+
+      - name: Confirm files were deployed and clean up
+        uses: azure/cli@v2
+        env:
+          STORAGE_ACCOUNT_NAME: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          STORAGE_ACCOUNT_CONTAINER_NAME: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+          LOCATION: ${{ secrets.LOCATION }}
+
+        with:
+          azcliversion: latest
+          inlineScript: |
+
+            blobs=$(az storage blob list \
+              --account-name $STORAGE_ACCOUNT_NAME \
+              --container-name $STORAGE_ACCOUNT_CONTAINER_NAME \
+              --query "length([])" \
+              --output tsv)
+
+            for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
+                echo "Deleting storage account $storageAccount..."
+                az storage account delete --ids $storageAccount --yes
+            done
+
+            echo "Verifying the presence of uploaded blobs..."
+            if [ "$blobs" -eq 0 ]; then
+              echo "::error::No blobs found in the container $STORAGE_ACCOUNT_CONTAINER_NAME."
+            else
+              echo "Found $blobs blobs in container $STORAGE_ACCOUNT_CONTAINER_NAME."
+            fi
