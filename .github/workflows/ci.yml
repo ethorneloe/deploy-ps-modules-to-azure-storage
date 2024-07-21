@@ -60,10 +60,10 @@ jobs:
       - name: Create azure storage account and blob container
         uses: azure/cli@v2
         env:
-          STORAGE_ACCOUNT_NAME: "${{ steps.azure-storage-names.outputs.storage-account-name }}"
-          STORAGE_ACCOUNT_CONTAINER_NAME: "${{ steps.azure-storage-names.outputs.storage-account-container-name }}"
-          RESOURCE_GROUP_NAME: "${{ secrets.RESOURCE_GROUP_NAME }}"
-          LOCATION: "${{ secrets.LOCATION }}"
+          STORAGE_ACCOUNT_NAME: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          STORAGE_ACCOUNT_CONTAINER_NAME: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          RESOURCE_GROUP_NAME: ${{ secrets.RESOURCE_GROUP_NAME }}
+          LOCATION: ${{ secrets.LOCATION }}
 
         with:
           azcliversion: latest
@@ -75,16 +75,16 @@ jobs:
             done
 
             echo "Creating new temp storage account $STORAGE_ACCOUNT_NAME..."
-            az storage account create /
-              --name $STORAGE_ACCOUNT_NAME /
-              --resource-group $RESOURCE_GROUP_NAME /
-              --location $LOCATION /
-              --kind BlobStorage /
+            az storage account create \
+              --name $STORAGE_ACCOUNT_NAME \
+              --resource-group $RESOURCE_GROUP_NAME \
+              --location $LOCATION \
+              --kind BlobStorage \
               --sku Standard_LRS
 
             echo "Creating new container $STORAGE_ACCOUNT_CONTAINER_NAME..."
-            az storage container create /
-              --account-name $STORAGE_ACCOUNT_NAME /
+            az storage container create \
+              --account-name $STORAGE_ACCOUNT_NAME \
               --name $STORAGE_ACCOUNT_CONTAINER_NAME
 
       - name: Test composite powershell action 1
