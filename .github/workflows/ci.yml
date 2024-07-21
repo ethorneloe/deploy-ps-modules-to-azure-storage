@@ -5,13 +5,13 @@ on:
   push:
     branches: [main]
     paths:
-      - "**/functions/*.ps1"
+      - "**/functions/**/*.ps1"
       - "**/tests/*.ps1"
       - ".github/workflows/ci.yml"
   pull_request:
     branches: [main]
     paths:
-      - "**/functions/*.ps1"
+      - "**/functions/**/*.ps1"
       - "**/tests/*.ps1"
       - ".github/workflows/ci.yml"
 
