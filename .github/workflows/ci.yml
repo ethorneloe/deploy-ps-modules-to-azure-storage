@@ -35,6 +35,8 @@ jobs:
 
           Invoke-Pester -Path $pesterTestFullName -Output Detailed
 
+        shell: pwsh
+
       - name: Authenticate to azure
         uses: azure/login@v2
         with:
