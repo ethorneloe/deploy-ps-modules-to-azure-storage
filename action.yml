@@ -72,7 +72,7 @@ runs:
         $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
 
         $output = & $mainFunctionBaseName @params -InformationAction Continue
-        $output | fl
+        $output | ConvertTo-Json
 
       shell: pwsh
 

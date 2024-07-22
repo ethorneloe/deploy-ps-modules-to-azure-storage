@@ -30,6 +30,7 @@ jobs:
 
       - name: Pester test main powershell function
         run: |
+          # Test main function
           $mainFunction = Get-ChildItem -Path "${{ github.workspace }}/powershell/functions/main" -filter "*.ps1"
           $mainFunctionBaseName = $mainFunction.BaseName
           $pesterTestFullName = "${{ github.workspace }}/powershell/tests/$mainFunctionBaseName.Tests.ps1"
@@ -48,7 +49,7 @@ jobs:
       - name: Generate names for temp storage account and blob container
         id: azure-storage-names
         run: |
-
+          # Generate random number and create names
           $randomNumber = Get-Random -Minimum 1000000000000 -Maximum 9999999999999
           $storageAccountName = "actionstemp$($randomNumber)"
           $storageAccountContainerName = 'psmodules'
@@ -69,6 +70,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            # Clear any existing storage accounts and create new temp storage account and container
             echo "Clearing any existing storage accounts"
             for storageAccount in $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[].id" --output tsv); do
                 echo "Deleting storage account $storageAccount"
@@ -112,7 +114,7 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
-
+            # Confirm uploaded blobs and remove temp storage account
             blobs=$(az storage blob list \
               --account-name $STORAGE_ACCOUNT_NAME \
               --container-name $STORAGE_ACCOUNT_CONTAINER_NAME \
