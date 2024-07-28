@@ -1,4 +1,4 @@
-[![Run Pester Tests](https://github.com/ethorneloe/deploy-ps-modules-to-azure-storage/actions/workflows/run-pester.yml/badge.svg)](https://github.com/ethorneloe/deploy-ps-modules-to-azure-storage/actions/workflows/run-pester.yml)
+[![PowerShell Composite Action CI](https://github.com/ethorneloe/deploy-ps-modules-to-azure-storage/actions/workflows/ci.yml/badge.svg)](https://github.com/ethorneloe/deploy-ps-modules-to-azure-storage/actions/workflows/ci.yml)
 
 # deploy-ps-modules-to-azure-storage
 # Overview
