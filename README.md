@@ -30,7 +30,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy PowerShell Modules to Azure Storage
-        uses: ethorneloe/deploy-ps-modules-to-azure-storage@main
+        uses: ethorneloe/deploy-ps-modules-to-azure-storage@v1
         with:
           storage-account-name: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           storage-account-container-name: ${{ vars.AZURE_STORAGE_ACCOUNT_CONTAINER_NAME }}
