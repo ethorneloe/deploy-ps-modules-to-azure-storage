@@ -120,6 +120,13 @@ jobs:
           tenant-id: ${{ secrets.TENANT_ID }}
           module-source-path: ${{ github.workspace }}/powershell/modules
 
+      - name: Test action with overwrite not specified and module-source-path not specified
+        uses: ./
+        with:
+          storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+
       - name: Confirm files were deployed and clean up
         uses: azure/cli@v2
         env:
