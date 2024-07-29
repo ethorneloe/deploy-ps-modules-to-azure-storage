@@ -4,6 +4,8 @@ $mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
 $mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
 $testModuleDirectory = Join-Path $parentDirectory -ChildPath "modules/"
 
+WRITE-Host $testModuleDirectory
+
 BeforeAll {
 
     # Setup test environment
