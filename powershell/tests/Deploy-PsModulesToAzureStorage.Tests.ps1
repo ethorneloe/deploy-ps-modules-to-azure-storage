@@ -2,6 +2,7 @@ $parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
 $mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
 $mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
 $mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
+$testModuleDirectory = Join-Path $parentDirectory -ChildPath "modules/"
 
 BeforeAll {
 
@@ -74,14 +75,8 @@ Describe "Test Function $mainFunctionName" {
 
     It "should read module version from .psd1 file and create zip archive" {
 
-        if (Test-Path $tempModuleSourcePath ) { Get-ChildItem $tempModuleSourcePath | Remove-Item -Recurse -Force -Confirm:$false }
-        if (Test-Path $tempOutputPath ) { Get-ChildItem $tempOutputPath | Remove-Item -Recurse -Force -Confirm:$false }
-
-        #Create a valid module
-        $validModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "ValidModule"
-        New-Item -Path $validModulePath -ItemType Directory -Force | Out-Null
-        New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
-        New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psm1") -ItemType File -Force | Out-Null
+        # Set the module directory in the params hashtable to the directory in this repo holding valid sample modules.
+        $script:params['moduleSourcePath'] = $testModuleDirectory
 
         & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip
