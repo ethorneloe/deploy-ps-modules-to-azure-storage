@@ -76,9 +76,16 @@ runs:
 
       shell: pwsh
 
+    - name: Generate UTC timestamp
+      id: timestamp
+      shell: pwsh
+      run: |
+        $timestamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd-HHmmss")
+        Write-Output "timestamp=$timestamp" >> $env:GITHUB_OUTPUT
+
     - uses: actions/upload-artifact@v4
       with:
-        name: "azcopylog"
+        name: azcopylog-${{ github.run_id }}-${{ steps.timestamp.outputs.timestamp }}
         path: ${{ steps.create-temp-output-path.outputs.outputPath }}/logs/*
         retention-days: 14
 

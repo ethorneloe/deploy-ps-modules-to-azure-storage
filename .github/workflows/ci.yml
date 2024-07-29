@@ -94,13 +94,30 @@ jobs:
               --auth-mode login \
               --output none
 
-      - name: Test composite powershell action 1
+      - name: Test action with overwrite set to true
         uses: ./
         with:
           storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
           storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
           tenant-id: ${{ secrets.TENANT_ID }}
           overwrite: true
+          repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
+
+      - name: Test action with overwrite set to False
+        uses: ./
+        with:
+          storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          overwrite: False
+          repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
+
+      - name: Test action with overwrite not specified
+        uses: ./
+        with:
+          storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
+          storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
+          tenant-id: ${{ secrets.TENANT_ID }}
           repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
 
       - name: Confirm files were deployed and clean up
