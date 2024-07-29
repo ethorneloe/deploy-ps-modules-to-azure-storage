@@ -35,7 +35,7 @@ jobs:
           storage-account-name: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           storage-account-container-name: ${{ vars.AZURE_STORAGE_ACCOUNT_CONTAINER_NAME }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          repo-powershell-module-path: "./powershell/modules"
+          module-source-path: "./powershell/modules"
 ```
 
 # Use Case
@@ -81,9 +81,9 @@ with:
   overwrite: false
 ```
 
-## repo-powershell-module-path
-The path within your git repo containing the powershell module folder or folders.
+## module-source-path
+The path within your git repo containing the powershell module folder or folders. Defaults to the `github.workspace` context variable.
 ```yaml
 with:
-  repo-powershell-module-path: 'your/path'
+  module-source-path: 'your/path'
 ```

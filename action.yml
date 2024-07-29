@@ -16,10 +16,10 @@ inputs:
     description: "An option to force files to be overwritten when they already exist in Azure storage"
     required: false
     default: "false"
-  repo-powershell-module-path:
-    description: "Path within your git repo containing the powershell module folder or folders"
-    required: true
-    default: "./"
+  module-source-path:
+    description: "Path within your git repo containing your powershell module folder(s)"
+    required: false
+    default: ${{ github.workspace }}
 
 runs:
   using: "composite"
@@ -54,8 +54,15 @@ runs:
             }
         }
 
+        $moduleSourcePath = '${{ inputs.module-source-path }}'
+
+        if( !(Test-Path -Path $moduleSourcePath) )
+        {
+          throw "$moduleSourcePath does not exist. Specify a valid path or leave module-source-path undeclared to use `${{ github.workspace }}"
+        }
+
         $params = @{
-            moduleSourcePath = '${{ inputs.repo-powershell-module-path }}'
+            moduleSourcePath = $moduleSourcePath
             outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
             storageAccountContainerName = '${{ inputs.storage-account-container-name }}'
             storageAccountName = '${{ inputs.storage-account-name }}'
