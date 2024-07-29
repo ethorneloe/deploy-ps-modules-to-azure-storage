@@ -130,7 +130,6 @@ function Deploy-PsModulesToAzureStorage {
                 $manifest = Test-ModuleManifest $psd1File -ErrorAction Stop
                 $moduleName = $manifest | Select-Object -ExpandProperty Name
                 $moduleVersion = $manifest.Version.ToString()
-
             }
             catch {
                 Throw "Module manifest file is not formatted properly - $_"
