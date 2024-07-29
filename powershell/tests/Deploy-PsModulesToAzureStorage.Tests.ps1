@@ -76,7 +76,7 @@ Describe "Test Function $mainFunctionName" {
     It "should read module version from .psd1 file and create zip archive" {
 
         # Set the module directory in the params hashtable to the directory in this repo holding valid sample modules.
-        $script:params["moduleSourcePath"] = $testModuleDirectory
+        $params["moduleSourcePath"] = $testModuleDirectory
 
         & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip
