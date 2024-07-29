@@ -1,12 +1,12 @@
-$parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
-$mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
-$mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
-$mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
-$testModuleDirectory = Join-Path $parentDirectory -ChildPath "modules/"
-
-WRITE-Host $testModuleDirectory
 
 BeforeAll {
+
+    # Get the main function name and the directory containing valid sample modules
+    $parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
+    $mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
+    $mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
+    $mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
+    $testModuleDirectory = Join-Path $parentDirectory -ChildPath "modules/"
 
     # Setup test environment
     $now = Get-Date
@@ -24,8 +24,8 @@ BeforeAll {
     # Dot source in the function
     . $mainFunction.FullName
 
-    # Params for the script executions
-    $script:params = @{
+    # Params for the main function calls in each test
+    $params = @{
         moduleSourcePath            = $tempModuleSourcePath
         outputPath                  = $tempOutputPath
         storageAccountContainerName = 'psmodules'
@@ -77,14 +77,7 @@ Describe "Test Function $mainFunctionName" {
 
     It "should read module version from .psd1 file and create zip archive" {
 
-        $params = @{
-            moduleSourcePath            = $testModuleDirectory
-            outputPath                  = $tempOutputPath
-            storageAccountContainerName = 'psmodules'
-            storageAccountName          = 'examplestorage'
-            tenantId                    = 'test'
-            overwrite                   = $false
-        }
+        $params['moduleSourcePath'] = $testModuleDirectory
 
         & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip
