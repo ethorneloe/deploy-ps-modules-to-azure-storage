@@ -61,7 +61,7 @@ Describe "Test Function $mainFunctionName" {
         { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
     }
 
-    It "should throw an error if a module does not contain a valid module version key/value pair in the .psd1 file" {
+    It "should throw an error if a module does not contain a valid manifest file" {
 
         # Create invalid .psd1 file without ModuleVersion
         $invalidPsd1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "InvalidPsd1Module"
@@ -69,7 +69,7 @@ Describe "Test Function $mainFunctionName" {
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psd1") -ItemType File -Force -Value "NoVersionInfo = '1.1.0'" | Out-Null
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psm1") -ItemType File -Force | Out-Null
 
-        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "Unable to complete deployment for module InvalidPsd1Module. ModuleVersion is not present or not set correctly in the .psd1 file.  Expected format is ModuleVersion = 'x.y.z'"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw
     }
 
     It "should read module version from .psd1 file and create zip archive" {

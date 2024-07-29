@@ -87,5 +87,3 @@ The path within your git repo containing the powershell module folder or folders
 with:
   repo-powershell-module-path: 'your/path'
 ```
-
-test changes
