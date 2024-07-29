@@ -75,8 +75,14 @@ Describe "Test Function $mainFunctionName" {
 
     It "should read module version from .psd1 file and create zip archive" {
 
-        # Set the module directory in the params hashtable to the directory in this repo holding valid sample modules.
-        $params["moduleSourcePath"] = $testModuleDirectory
+        $params = @{
+            moduleSourcePath            = $testModuleDirectory
+            outputPath                  = $tempOutputPath
+            storageAccountContainerName = 'psmodules'
+            storageAccountName          = 'examplestorage'
+            tenantId                    = 'test'
+            overwrite                   = $false
+        }
 
         & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip
