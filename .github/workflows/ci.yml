@@ -103,7 +103,7 @@ jobs:
           overwrite: true
           repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
 
-      - name: Test action with overwrite set to false
+      - name: Test action with overwrite set to False
         uses: ./
         with:
           storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
@@ -118,7 +118,6 @@ jobs:
           storage-account-name: ${{ steps.azure-storage-names.outputs.storage-account-name }}
           storage-account-container-name: ${{ steps.azure-storage-names.outputs.storage-account-container-name }}
           tenant-id: ${{ secrets.TENANT_ID }}
-          overwrite: true
           repo-powershell-module-path: ${{ github.workspace }}/powershell/modules
 
       - name: Confirm files were deployed and clean up
