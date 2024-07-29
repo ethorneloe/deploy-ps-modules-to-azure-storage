@@ -82,7 +82,7 @@ with:
 ```
 
 ## module-source-path
-The path within your git repo containing the powershell module folder or folders. Defaults to the `github.workspace` context variable.
+The path within your git repo containing the powershell module folder or folders. If not specified, the default is the `github.workspace` context variable.
 ```yaml
 with:
   module-source-path: 'your/path'
