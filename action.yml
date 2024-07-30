@@ -42,42 +42,25 @@ runs:
       run: |
         # Execute deploy-ps-modules-to-azure.ps1
 
-        $overwrite = '${{ inputs.overwrite }}'.ToLower().Trim()
-
-        switch ($overwrite) {
-            'true'  { $overwrite = $true }
-            'false' { $overwrite = $false }
-            $null   { $overwrite = $false }
-            ''      { $overwrite = $false }
-            default {
-                throw "The value defined for the overwrite parameter (overwrite=$overwrite) could not be converted to a boolean value. Valid values are 'True', 'true', 'False', 'false'."
-            }
-        }
-
-        $moduleSourcePath = '${{ inputs.module-source-path }}'
-
-        if( !(Test-Path -Path $moduleSourcePath) )
-        {
-          throw "$moduleSourcePath does not exist. Specify a valid path or leave module-source-path undeclared to use `${{ github.workspace }}"
-        }
-
+        # Configure function params
         $params = @{
-            moduleSourcePath = $moduleSourcePath
+            moduleSourcePath = '${{ inputs.module-source-path }}'
             outputPath = '${{ steps.create-temp-output-path.outputs.outputPath }}'
             storageAccountContainerName = '${{ inputs.storage-account-container-name }}'
             storageAccountName = '${{ inputs.storage-account-name }}'
             tenantId = '${{ inputs.tenant-id }}'
-            overwrite = $overwrite
+            overwrite = [System.Convert]::ToBoolean('${{ inputs.overwrite }}')
         }
 
+        # Dot source in all the functions in this action repo
         $functions = Get-ChildItem -Path '${{ github.action_path }}/powershell/functions' -Recurse -Filter "*.ps1"
         $functions | ForEach-Object {
           . $_.FullName
         }
 
+        # Extract the main function and execute
         $mainFunction = Get-ChildItem -Path '${{ github.action_path }}/powershell/functions/main' -Filter "*.ps1"
         $mainFunctionBaseName = $mainFunction | Select-Object -ExpandProperty BaseName
-
         $output = & $mainFunctionBaseName @params -InformationAction Continue
         $output | ConvertTo-Json
 

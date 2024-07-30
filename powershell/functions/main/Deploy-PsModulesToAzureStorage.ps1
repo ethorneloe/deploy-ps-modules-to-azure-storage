@@ -43,10 +43,12 @@ function Deploy-PsModulesToAzureStorage {
     param (
 
         [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [string]$moduleSourcePath,
 
         [Parameter(Mandatory = $true)]
-        [string]$outputPath,
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
+        [string]$outputPath
 
         [Parameter(Mandatory = $true)]
         [string]$storageAccountContainerName,
