@@ -1,9 +1,12 @@
-$parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
-$mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
-$mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
-$mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
 
 BeforeAll {
+
+    # Get the main function name and the directory containing valid sample modules
+    $parentDirectory = Join-Path $PSScriptRoot -ChildPath ".."
+    $mainFunctionDirectory = Join-Path $parentDirectory -ChildPath "functions/main/"
+    $mainFunction = Get-ChildItem -Path $mainFunctionDirectory -Filter "*.ps1"
+    $mainFunctionName = $mainFunction | Select-Object -ExpandProperty Name
+    $testModuleDirectory = Join-Path $parentDirectory -ChildPath "modules/"
 
     # Setup test environment
     $now = Get-Date
@@ -21,8 +24,8 @@ BeforeAll {
     # Dot source in the function
     . $mainFunction.FullName
 
-    # Params for the script executions
-    $script:params = @{
+    # Params for the main function calls in each test
+    $params = @{
         moduleSourcePath            = $tempModuleSourcePath
         outputPath                  = $tempOutputPath
         storageAccountContainerName = 'psmodules'
@@ -61,7 +64,7 @@ Describe "Test Function $mainFunctionName" {
         { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "No valid powershell modules found in this repo. Module folders need to contain .psm1 and .psd1 files"
     }
 
-    It "should throw an error if a module does not contain a valid module version key/value pair in the .psd1 file" {
+    It "should throw an error if a module does not contain a valid manifest file" {
 
         # Create invalid .psd1 file without ModuleVersion
         $invalidPsd1ModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "InvalidPsd1Module"
@@ -69,19 +72,12 @@ Describe "Test Function $mainFunctionName" {
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psd1") -ItemType File -Force -Value "NoVersionInfo = '1.1.0'" | Out-Null
         New-Item -Path (Join-Path -Path $invalidPsd1ModulePath -ChildPath "InvalidPsd1Module.psm1") -ItemType File -Force | Out-Null
 
-        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw "Unable to complete deployment for module InvalidPsd1Module. ModuleVersion is not present or not set correctly in the .psd1 file.  Expected format is ModuleVersion = 'x.y.z'"
+        { & $mainFunctionBaseName @params -WhatIf } | Should -Throw
     }
 
     It "should read module version from .psd1 file and create zip archive" {
 
-        if (Test-Path $tempModuleSourcePath ) { Get-ChildItem $tempModuleSourcePath | Remove-Item -Recurse -Force -Confirm:$false }
-        if (Test-Path $tempOutputPath ) { Get-ChildItem $tempOutputPath | Remove-Item -Recurse -Force -Confirm:$false }
-
-        #Create a valid module
-        $validModulePath = Join-Path -Path $tempModuleSourcePath -ChildPath "ValidModule"
-        New-Item -Path $validModulePath -ItemType Directory -Force | Out-Null
-        New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psd1") -ItemType File -Force -Value "ModuleVersion = '1.1.0'" | Out-Null
-        New-Item -Path (Join-Path -Path $validModulePath -ChildPath "ValidModule.psm1") -ItemType File -Force | Out-Null
+        $params['moduleSourcePath'] = $testModuleDirectory
 
         & $mainFunctionBaseName @params -WhatIf
         $zipFiles = Get-ChildItem -Path $tempOutputPath -recurse -Filter *.zip

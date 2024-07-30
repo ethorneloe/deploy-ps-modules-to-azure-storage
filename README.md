@@ -30,12 +30,12 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Deploy PowerShell Modules to Azure Storage
-        uses: ethorneloe/deploy-ps-modules-to-azure-storage@main
+        uses: ethorneloe/deploy-ps-modules-to-azure-storage@v1
         with:
           storage-account-name: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
           storage-account-container-name: ${{ vars.AZURE_STORAGE_ACCOUNT_CONTAINER_NAME }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          repo-powershell-module-path: "./powershell/modules"
+          module-source-path: "./powershell/modules"
 ```
 
 # Use Case
@@ -44,9 +44,9 @@ Changes to your custom Powershell script modules need to be deployed to an Azure
 # Requirements
 - An Azure subscription with a storage account and blob container configured.
 - An app registration or identity with write access to the blob container specified.
-- One or more Powershell script modules contained in a directory within your repo. Currently the action only supports modules that are defined as folders with .psm1 and .psd1 files, and the .psd1 file must have the `ModuleVersion = 'x.y.z'` key/value pair defined.  The action will discover the folders that contain these files.
-- Your GitHub workflow already contains the checkout and Azure login steps as shown in the example.
-- If you are using a private endpointed storage account then make sure you configure your workflow to specify an appropriate runner or runner group.
+- One or more Powershell script modules contained in a directory within your repo. Currently only script modules that are defined as folders with .psm1 and .psd1 files are supported, and the .psd1 must use valid module manifest format. More info on manifest files can be found [here](https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.4)
+- Your GitHub workflow already contains the `actions/checkout` and `azure/login` steps as shown in the example.
+- If you are using a storage account with private endpoint then make sure you configure your workflow to specify an appropriate runner or runner group.
 
 # Inputs
 ## storage-account-name
@@ -81,11 +81,9 @@ with:
   overwrite: false
 ```
 
-## repo-powershell-module-path
-The path within your git repo containing the powershell module folder or folders.
+## module-source-path
+The path within your git repo containing the powershell module folder or folders. If not specified, the default is the `github.workspace` context variable.
 ```yaml
 with:
-  repo-powershell-module-path: 'your/path'
+  module-source-path: 'your/path'
 ```
-
-test changes

@@ -43,9 +43,11 @@ function Deploy-PsModulesToAzureStorage {
     param (
 
         [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [string]$moduleSourcePath,
 
         [Parameter(Mandatory = $true)]
+        [ValidateScript({Test-Path -Path $_ -PathType Container})]
         [string]$outputPath,
 
         [Parameter(Mandatory = $true)]
@@ -125,15 +127,15 @@ function Deploy-PsModulesToAzureStorage {
             $psd1File = Get-ChildItem -Path $moduleFolder | Where-Object { $_.extension -eq '.psd1' }
             $moduleName = $psd1File.BaseName
 
-            # Read the module version from the .psd1 file. Fail here if not found.
-            $content = Get-Content -Path $psd1File.FullName
-            $versionLine = $content | Select-String -Pattern "ModuleVersion\s*=\s*'(\d+\.\d+\.\d+)'"
-            if ($null -eq $versionLine) {
-                throw "ModuleVersion is not present or not set correctly in the .psd1 file.  Expected format is ModuleVersion = 'x.y.z'"
+            # Check the validity of the psd1 file
+            try {
+                $manifest = Test-ModuleManifest $psd1File -ErrorAction Stop
+                $moduleName = $manifest | Select-Object -ExpandProperty Name
+                $moduleVersion = $manifest.Version.ToString()
             }
-
-            # Extract the version number from the psd1 file
-            $moduleVersion = $versionLine.Matches.Groups[1].Value.Trim()
+            catch {
+                Throw "Module manifest file is not formatted properly - $_"
+            }
 
             # Configure filename and path for compression
             $zipFileName = "$moduleName-v$moduleVersion.zip"
