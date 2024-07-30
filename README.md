@@ -44,7 +44,7 @@ Changes to your custom Powershell script modules need to be deployed to an Azure
 # Requirements
 - An Azure subscription with a storage account and blob container configured.
 - An app registration or identity with write access to the blob container specified.
-- One or more Powershell script modules contained in a directory within your repo.  The action will discover the module folders based on the root location you specify. Currently only script modules that are defined as folders with .psm1 and .psd1 files are supported, and the .psd1 must use valid module manifest format. More info on manifest files can be found [here](https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.4)
+- One or more Powershell script modules contained in a directory within your repo. Currently only script modules that are defined as folders with .psm1 and .psd1 files are supported, and the .psd1 must use valid module manifest format. More info on manifest files can be found [here](https://learn.microsoft.com/en-us/powershell/scripting/developer/module/how-to-write-a-powershell-module-manifest?view=powershell-7.4)
 - Your GitHub workflow already contains the `actions/checkout` and `azure/login` steps as shown in the example.
 - If you are using a storage account with private endpoint then make sure you configure your workflow to specify an appropriate runner or runner group.
 
